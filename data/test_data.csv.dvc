@@ -1,11 +1,4 @@
-md5: c55b0a1ac97d7e78742618ebb83bd839
-frozen: true
-deps:
-- checksum: '"c28d4b3e45f53e9cefb273284dbcdc3c457ff11cea10e92705337d903e078d9c"'
-  size: 1400003
-  path: 
-    https://raw.githubusercontent.com/mir-shahezad/MLOPS/refs/heads/main/test.csv
 outs:
-- md5: 95dcc54f1b8edc1f76bd5ec3881b400e
-  size: 1400003
+- md5: ed2b36d61de4c091729bcd1357f94330
+  size: 1415621
   path: test_data.csv
