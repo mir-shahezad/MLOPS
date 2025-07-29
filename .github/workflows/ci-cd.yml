@@ -52,14 +52,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Deploy to a server (Example)
-      run: |
-        echo "This is where you would SSH into a server and run 'docker run...'"
-        echo "For this assignment, just printing the command is enough."
-        echo "docker pull ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest"
-        echo "docker run -d -p 80:8000 ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest"
-#        docker version
-#        docker pull shahezme/iris-classifier-app:latest
-#        docker run --detach -p 8000:8000 shahezme/iris-classifier-app:latest
+      #run: |
+        #echo "This is where you would SSH into a server and run 'docker run...'"
+        #echo "For this assignment, just printing the command is enough."
+        #echo "docker pull ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest"
+        #echo "docker run -d -p 80:8000 ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest"
+        #docker version
+        #docker pull shahezme/iris-classifier-app:latest
+        #docker run --detach -p 8000:8000 shahezme/iris-classifier-app:latest
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.SERVER_HOST }}
