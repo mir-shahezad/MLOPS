@@ -74,7 +74,7 @@ jobs:
           sudo docker rm iris-classifier-app || true
 
           # Run the new container
-          sudo docker run -d --name iris-classifier-app -p 80:8000 ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest
+          sudo docker run -d --name iris-classifier-app -p 8000:8000 ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest
 
 
 
