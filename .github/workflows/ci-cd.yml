@@ -67,14 +67,14 @@ jobs:
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         script: |
           # Pull the latest image from Docker Hub
-          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest
+          sudo docker pull ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest
 
           # Stop and remove the old container if it exists
-          docker stop iris-classifier-app || true
-          docker rm iris-classifier-app || true
+          sudo docker stop iris-classifier-app || true
+          sudo docker rm iris-classifier-app || true
 
           # Run the new container
-          docker run -d --name iris-classifier-app -p 80:8000 ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest
+          sudo docker run -d --name iris-classifier-app -p 80:8000 ${{ secrets.DOCKERHUB_USERNAME }}/iris-classifier-app:latest
 
 
 
