@@ -153,7 +153,8 @@ app = FastAPI()
 
 # Load the model on startup
 #model = mlflow.pyfunc.load_model("model")
-MODEL_PATH = "exported_model"
+# MODEL_PATH = "exported_model"
+MODEL_PATH = "model"
 model = mlflow.sklearn.load_model(MODEL_PATH)
 # --- Prometheus Metrics ---
 REQUEST_COUNT = Counter("predict_requests_total", "Total prediction requests")
