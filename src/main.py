@@ -71,22 +71,159 @@
 
 # src/main.py
 
-from fastapi import FastAPI
+# from fastapi import FastAPI
+# import mlflow.pyfunc
+#
+# app = FastAPI()
+#
+# # Load model once when container starts
+# model = mlflow.pyfunc.load_model("model")
+#
+# @app.get("/")
+# def read_root():
+#     return {"message": "Model is up and running"}
+#
+# @app.post("/predict")
+# def predict(input: dict):
+#     import pandas as pd
+#     input_df = pd.DataFrame([input])
+#     prediction = model.predict(input_df)
+#     return {"prediction": prediction.tolist()}
+#####################################################################
+# from fastapi import FastAPI, HTTPException
+# from pydantic import BaseModel
+# import mlflow.sklearn
+# import pandas as pd
+# import logging
+#
+# # Logging setup
+# logging.basicConfig(level=logging.INFO)
+# logger = logging.getLogger(__name__)
+#
+# app = FastAPI()
+#
+# # === Define Input Schema ===
+# class IrisInput(BaseModel):
+#     sepal_length: float
+#     sepal_width: float
+#     petal_length: float
+#     petal_width: float
+#
+# # === Load Model ===
+# MODEL_PATH = "exported_model"
+# try:
+#     model = mlflow.sklearn.load_model(MODEL_PATH)
+#     logger.info("Model loaded successfully.")
+# except Exception as e:
+#     logger.error(f"Model loading failed: {e}")
+#     model = None
+#
+# @app.get("/")
+# def health_check():
+#     return {"message": "Iris Classifier API is running!"}
+#
+# @app.post("/predict")
+# def predict(input: IrisInput):
+#     if model is None:
+#         raise HTTPException(status_code=500, detail="Model not loaded.")
+#
+#     input_df = pd.DataFrame([input.dict()])
+#     input_df.columns = [
+#         'sepal_length', 'sepal_width',
+#         'petal_length', 'petal_width'
+#     ]
+#
+#     prediction = model.predict(input_df)
+#     return {"prediction": int(prediction[0])}
+##########################################################################################
+from fastapi import FastAPI, Request
+from pydantic import BaseModel
 import mlflow.pyfunc
+import pandas as pd
+import logging
+import time
+from prometheus_client import Counter, Histogram, generate_latest, CONTENT_TYPE_LATEST
+from fastapi.responses import Response
 
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+
+# Initialize FastAPI app
 app = FastAPI()
 
-# Load model once when container starts
-model = mlflow.pyfunc.load_model("model")
+# Load the model on startup
+#model = mlflow.pyfunc.load_model("model")
+MODEL_PATH = "exported_model"
+model = mlflow.sklearn.load_model(MODEL_PATH)
+# --- Prometheus Metrics ---
+REQUEST_COUNT = Counter("predict_requests_total", "Total prediction requests")
+REQUEST_LATENCY = Histogram("predict_request_latency_seconds", "Prediction latency in seconds")
 
+# --- Input Schema ---
+# class InputData(BaseModel):
+#     sepal_length: float
+#     sepal_width: float
+#     petal_length: float
+#     petal_width: float
+
+# --- Routes ---
 @app.get("/")
 def read_root():
     return {"message": "Model is up and running"}
 
+@app.get("/metrics")
+def metrics():
+    return Response(content=generate_latest(), media_type=CONTENT_TYPE_LATEST)
+
+# @app.post("/predict")
+# def predict(input: InputData):
+#     start_time = time.time()
+#     REQUEST_COUNT.inc()
+#
+#     # Convert input to dataframe
+#     input_dict = input.dict()
+#     logging.info(f"Received input: {input_dict}")
+#     input_df = pd.DataFrame([input_dict])
+#
+#     # Prediction
+#     prediction = model.predict(input_df)
+#     result = int(prediction[0])
+#     logging.info(f"Prediction result: {result}")
+#
+#     REQUEST_LATENCY.observe(time.time() - start_time)
+#     return {"prediction": result}
+
+# @app.post("/predict")
+# def predict(input):
+#     # # Map keys from short to original feature names
+#     # key_map = {
+#     #     "sepal_length": "sepal length (cm)",
+#     #     "sepal_width": "sepal width (cm)",
+#     #     "petal_length": "petal length (cm)",
+#     #     "petal_width": "petal width (cm)"
+#     # }
+#     #
+#     # remapped_input = {key_map.get(k, k): v for k, v in input.items()}
+#     # input_df = pd.DataFrame([remapped_input])
+#     if model is None:
+#         raise HTTPException(status_code=500, detail="Model not loaded.")
+#
+#     input_df = pd.DataFrame([input.dict()])
+#     input_df.columns = [
+#         'sepal_length', 'sepal_width',
+#         'petal_length', 'petal_width'
+#     ]
+#
+#     prediction = model.predict(input_df)
+#     return {"prediction": int(prediction[0])}
 @app.post("/predict")
 def predict(input: dict):
     import pandas as pd
+    start_time = time.time()
+    REQUEST_COUNT.inc()
     input_df = pd.DataFrame([input])
     prediction = model.predict(input_df)
+    result = int(prediction[0])
+    logging.info(f"Prediction result: {result}")
+    REQUEST_LATENCY.observe(time.time() - start_time)
     return {"prediction": prediction.tolist()}
-
